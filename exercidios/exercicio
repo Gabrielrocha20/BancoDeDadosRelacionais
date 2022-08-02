@@ -1,0 +1,66 @@
+-- 1) Insira 5 usuários
+INSERT INTO users (first_name, last_name, email, password_hash, salary)
+VALUES
+("GbBurro", "Silva", "gbburro@gmail.com", "HSDHADS", round(rand() * 10000, 2)),
+("Milens", "Lima", "milenalindalima1@gmail.com", "HSA!LK", round(rand() * 10000, 2)),
+("Valber", "Jesus", "valberjesus@gmail.com", "QWEMSDA", round(rand() * 10000, 2)),
+("Samuel", "Santiago", "samuelsantiago@gmail.com", "HGFKSADN", round(rand() * 10000, 2)),
+("Vayne", "Vinicius", "vayne@gmail.com", "SDWEQWS", round(rand() * 10000, 2));
+
+-- 2) Insira 5 perfís para os usuários inseridos
+INSERT INTO profiles (bio, description, user_id)
+SELECT
+CONCAT('Bio de', first_name),
+CONCAT('Description', first_name),id FROM users
+WHERE id ORDER BY id DESC LIMIT 5; 
+
+-- 3) Insira permissões (roles) para os usuários inseridos
+INSERT INTO user_roles (user_id, role_id)
+SELECT
+id,(SELECT id FROM roles ORDER BY rand() limit 1) as qualquer FROM users
+WHERE id ORDER BY id DESC LIMIT 5;
+
+-- 4) Selecione os últimos 5 usuários por ordem decrescente
+SELECT id, first_name FROM users
+WHERE id ORDER BY id DESC LIMIT 5;
+
+-- 5) Atualize o último usuário inserido
+UPDATE users SET first_name = 'Marcos Vinicius'
+WHERE id = 111;
+
+-- 6) Remova uma permissão de algum usuário
+DELETE FROM user_roles WHERE user_id = 111 AND  role_id = 2;
+
+-- 7) Remova um usuário que tem a permissão "PUT"
+-- SELECT u.id, u.first_name, r.name
+DELETE u 
+FROM users u  
+JOIN user_roles ur 
+ON u.id = ur.user_id
+JOIN roles r ON ur.role_id = r.id 
+WHERE r.name = 'GET'AND u.id = 16;
+
+
+-- 8) Selecione usuários com perfís e permissões (obrigatório)
+SELECT u.first_name, COUNT(u.id)as total , COUNT(p.user_id) FROM users u
+JOIN profiles p 
+ON p.user_id = u.id
+JOIN user_roles ur ON ur.user_id = u.id
+GROUP BY first_name 
+ORDER BY total ASC;
+
+-- 9) Selecione usuários com perfís e permissões (opcional)
+SELECT u.first_name, COUNT(u.id)as total , COUNT(p.user_id) FROM users u
+LEFT JOIN profiles p 
+ON p.user_id = u.id
+JOIN user_roles ur ON ur.user_id = u.id
+GROUP BY first_name 
+ORDER BY total ASC;
+
+-- 10) Selecione usuários com perfís e permissões ordenando por salário
+SELECT u.first_name, u.salary , COUNT(p.user_id), COUNT(ur.user_id) FROM users u
+JOIN profiles p 
+ON p.user_id = u.id
+JOIN user_roles ur ON ur.user_id = u.id
+GROUP BY first_name, salary 
+ORDER BY salary  ASC;
